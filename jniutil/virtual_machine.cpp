@@ -21,7 +21,7 @@ void jvm::virtual_machine::create(const std::string &classPath)
 	{
 		if (fixedPath[n] == '/' || fixedPath[n] == '\\')
 		{
-#ifdef CONFIG_VARIANT_windows
+#ifdef _WIN32
 			#define realpath(N,R) _fullpath((R),(N),1024)
 			fixedPath[n] = '\\';
 #else
@@ -149,7 +149,8 @@ static std::vector<jvm::global_init_enlist_base *> &global_inits()
 
 void global_init_startup()
 {
-    for (int n = 0; n < global_inits().size(); n++)
+    std::vector<jvm::global_init_enlist_base *>::size_type n;
+    for (n = 0; n < global_inits().size(); n++)
         global_inits()[n]->startup();
 }
 
