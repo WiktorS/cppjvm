@@ -26,6 +26,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				Description="Java build"
+				CommandLine="mkdir &quot;$(TargetDir)&quot; &gt;NUL 2&gt;NUL&#x0D;&#x0A;mkdir &quot;$(IntDir)\java&quot; &gt;NUL 2&gt;NUL&#x0D;&#x0A;del &quot;$(IntDir)\java\&quot;*.* &gt;NUL 2&gt;NUL&#x0D;&#x0A;&quot;$(JAVA_HOME)\bin\javac&quot; -d &quot;$(IntDir)\java&quot; -g -source 6 -target 6 -Xlint:-options &quot;$(ProjectDir)src\com\earwicker\cppjvm\cppwrap&quot;\*.java&#x0D;&#x0A;&quot;$(JAVA_HOME)\bin\jar&quot; cvf  &quot;$(OutDir)\$(TargetName).jar&quot; -C &quot;$(IntDir)\java&quot; .&#x0D;&#x0A;"
+				Outputs="&quot;$(OutDir)\$(TargetName).jar&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -98,6 +101,9 @@
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
+				Description="Java build"
+				CommandLine="mkdir &quot;$(TargetDir)&quot; &gt;NUL 2&gt;NUL&#x0D;&#x0A;mkdir &quot;$(IntDir)\java&quot; &gt;NUL 2&gt;NUL&#x0D;&#x0A;del &quot;$(IntDir)\java\&quot;*.* &gt;NUL 2&gt;NUL&#x0D;&#x0A;&quot;$(JAVA_HOME)\bin\javac&quot; -d &quot;$(IntDir)\java&quot; -g:none -source 6 -target 6 -Xlint:-options &quot;$(ProjectDir)src\com\earwicker\cppjvm\cppwrap&quot;\*.java&#x0D;&#x0A;&quot;$(JAVA_HOME)\bin\jar&quot; cvf  &quot;$(OutDir)\$(TargetName).jar&quot; -C &quot;$(IntDir)\java&quot; .&#x0D;&#x0A;"
+				Outputs="&quot;$(OutDir)\$(TargetName).jar&quot;"
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
