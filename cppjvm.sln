@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cppwrap", "cppwrap\cppwrap.vcproj", "{177C403A-CD46-4050-8BA8-EB460E495C3A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jniutil", "jniutil\jniutil.vcproj", "{E3AEF09A-7BBB-4AF0-91AD-F4365DF54EB3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{177C403A-CD46-4050-8BA8-EB460E495C3A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{177C403A-CD46-4050-8BA8-EB460E495C3A}.Debug|Win32.Build.0 = Debug|Win32
+		{177C403A-CD46-4050-8BA8-EB460E495C3A}.Release|Win32.ActiveCfg = Release|Win32
+		{177C403A-CD46-4050-8BA8-EB460E495C3A}.Release|Win32.Build.0 = Release|Win32
+		{E3AEF09A-7BBB-4AF0-91AD-F4365DF54EB3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{E3AEF09A-7BBB-4AF0-91AD-F4365DF54EB3}.Debug|Win32.Build.0 = Debug|Win32
+		{E3AEF09A-7BBB-4AF0-91AD-F4365DF54EB3}.Release|Win32.ActiveCfg = Release|Win32
+		{E3AEF09A-7BBB-4AF0-91AD-F4365DF54EB3}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
