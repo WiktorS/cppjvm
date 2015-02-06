@@ -30,3 +30,7 @@ out/
 ipch/
 *.aps
 *.ncb
+
+# Idea IntelliJ
+.idea
+*.iml
