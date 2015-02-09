@@ -14,13 +14,21 @@ namespace jvm
 		virtual_machine()
 			: m_jvm(0) {}
 
+#if defined(CPPJVM_VMCREATE)
 		virtual_machine(const std::string &classPath)
 			: m_jvm(0) { create(classPath); }
+#endif
+#if defined(CPPJVM_VMSET)
+    virtual_machine(JavaVM *jvm) 
+      : m_jvm(jvm) {}
+#endif
 
 		~virtual_machine()
 			{ destroy(); }
 
+#if defined(CPPJVM_VMCREATE)
 		void create(const std::string &classPath);
+#endif
 		void destroy();
 
 		JNIEnv *env(JNIEnv *e = 0) const;
@@ -36,7 +44,9 @@ namespace jvm
 	};
 
 	virtual_machine &global_vm();
+#if defined(CPPJVM_VMCREATE)
 	void create_global_vm(const std::string &classPath);
+#endif
 	virtual_machine *swap_global_vm(virtual_machine *vm);
 	bool global_vm_available();
 

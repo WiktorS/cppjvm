@@ -8,6 +8,7 @@
 #include <vector>
 #include <algorithm>
 
+#if defined(CPPJVM_VMCREATE)
 void jvm::virtual_machine::create(const std::string &classPath)
 {
 	JavaVMInitArgs args;
@@ -46,6 +47,7 @@ void jvm::virtual_machine::create(const std::string &classPath)
 	if (JNI_CreateJavaVM(&m_jvm, (void **)&junk, &args) < 0)
 		throw std::logic_error("Could not create JavaVM");
 }
+#endif
 
 void jvm::virtual_machine::destroy()
 {
@@ -180,6 +182,7 @@ void jvm::delist(global_init_enlist_base *init)
         global_inits().end());
 }
 
+#if defined(CPPJVM_VMCREATE)
 void jvm::create_global_vm(const std::string &classPath)
 {
 	if (g_vm != 0)
@@ -190,6 +193,7 @@ void jvm::create_global_vm(const std::string &classPath)
 	
 	global_init_startup();
 }
+#endif
 
 jvm::virtual_machine &jvm::global_vm()
 {
