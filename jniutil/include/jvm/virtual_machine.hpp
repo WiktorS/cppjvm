@@ -19,8 +19,8 @@ namespace jvm
 			: m_jvm(0) { create(classPath); }
 #endif
 #if defined(CPPJVM_VMSET)
-    virtual_machine(JavaVM *jvm) 
-      : m_jvm(jvm) {}
+		virtual_machine(JavaVM *jvm) 
+			: m_jvm(jvm) {}
 #endif
 
 		~virtual_machine()
@@ -88,7 +88,7 @@ namespace jvm
 	};
 	
 	void enlist(global_init_enlist_base *init);
-    void delist(global_init_enlist_base *init);
+	void delist(global_init_enlist_base *init);
 }
 
 #endif
