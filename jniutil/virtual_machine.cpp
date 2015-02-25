@@ -98,17 +98,7 @@ void jvm::virtual_machine::check_exception(JNIEnv *e) const
 	}
 }
 
-void jvm::virtual_machine::throw_exception(const std::string &msg, JNIEnv *e) const
-{
-	static jclass excls = env(e)->FindClass("java/lang/Exception");
-	env(e)->ThrowNew(excls, msg.c_str());
-}
-
-void jvm::virtual_machine::throw_exception(const std::wstring &msg, JNIEnv *e) const
-{
-	throw_exception(Util::ToMultiByte(msg), e);
-}
-
+#if defined(CPPJVM_STL)
 std::wstring jvm::virtual_machine::wstring(jstring v, JNIEnv *e) const
 {
 	jboolean c = 0;
@@ -136,6 +126,69 @@ jstring jvm::virtual_machine::string(const std::wstring &v, JNIEnv *e) const
 {
 	return env(e)->NewStringUTF(Util::ToUTF8(v).c_str());
 }
+
+void jvm::virtual_machine::throw_exception(const std::string &msg, JNIEnv *e) const
+{
+	static jclass excls = env(e)->FindClass("java/lang/Exception");
+	env(e)->ThrowNew(excls, msg.c_str());
+}
+
+void jvm::virtual_machine::throw_exception(const std::wstring &msg, JNIEnv *e) const
+{
+	throw_exception(Util::ToMultiByte(msg), e);
+}
+#endif
+
+#if defined(CPPJVM_MFC)
+CStringW jvm::virtual_machine::wstring(jstring v, JNIEnv *e) const
+{
+  JNIEnv* env = this->env(e);
+	jboolean isCopy = JNI_FALSE;
+  const jchar* chars = env->GetStringChars(v, &isCopy);
+  CStringW result;
+  if (chars)
+  {
+    result.SetString(reinterpret_cast<const wchar_t*>(chars));
+    env->ReleaseStringChars(v, chars);
+  }
+	return result;
+}
+
+CStringA jvm::virtual_machine::string(jstring v, JNIEnv *e) const
+{
+  return CStringA(wstring(v, e).GetString());
+}
+
+jstring jvm::virtual_machine::string(const CStringA &v, JNIEnv *e) const
+{
+  CStringW s(v);
+  return env(e)->NewString(reinterpret_cast<const jchar *>(s.GetString()), s.GetLength());
+}
+
+jstring jvm::virtual_machine::string(const CStringW &v, JNIEnv *e) const
+{
+	return env(e)->NewString(reinterpret_cast<const jchar *>(v.GetString()), v.GetLength());
+}
+
+void jvm::virtual_machine::throw_exception(const CStringA &msg, JNIEnv *e) const
+{
+  throw_exception(CStringW(msg));
+}
+
+void jvm::virtual_machine::throw_exception(const CStringW &msg, JNIEnv *e) const
+{
+    CStringA msgUtf8;
+    int bufferLength = msg.GetLength()*4;
+    LPTSTR p = msgUtf8.GetBuffer(bufferLength); //worst case
+    int msgUtf8Length = WideCharToMultiByte(CP_UTF8, 0, msg.GetString(), msg.GetLength(), p, bufferLength, NULL, NULL);
+    msgUtf8.ReleaseBuffer(msgUtf8Length);
+
+    JNIEnv* env = this->env(e);
+	  /*static*/ jclass excls = env->FindClass("java/lang/Exception");
+    env->ExceptionClear();
+	  env->ThrowNew(excls, msgUtf8.GetString());
+}
+#endif
 
 jvm::virtual_machine *g_vm = 0;
 jvm::virtual_machine g_vm_default;
@@ -195,7 +248,7 @@ void jvm::create_global_vm(const std::string &classPath)
 }
 #endif
 
-jvm::virtual_machine &jvm::global_vm()
+const jvm::virtual_machine &jvm::global_vm()
 {
 	if (g_vm == 0)
 		throw std::logic_error("No virtual machine available");

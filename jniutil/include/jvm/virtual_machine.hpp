@@ -4,9 +4,21 @@
 #include <stdexcept>
 #include <jni.h>
 
+#include "jniutil.hpp"
+
+#if defined(CPPJVM_MFC)
+
+#ifndef WINVER				// Allow use of features specific to Windows XP or later.
+#define WINVER 0x0501		// Change this to the appropriate value to target other versions of Windows.
+#endif
+
+#include <afx.h>
+#include <afxstr.h>
+#endif
+
 namespace jvm
 {
-	class virtual_machine
+	class CPPJVM_API virtual_machine
 	{
 		JavaVM *m_jvm;
 
@@ -32,22 +44,35 @@ namespace jvm
 		void destroy();
 
 		JNIEnv *env(JNIEnv *e = 0) const;
+    void check_exception(JNIEnv *e = 0) const;
 
+#if defined(CPPJVM_STL)
 		jstring string(const std::string &v, JNIEnv *e = 0) const;
 		jstring string(const std::wstring &v, JNIEnv *e = 0) const;
 		std::wstring wstring(jstring v, JNIEnv *e = 0) const;
 		std::string string(jstring v, JNIEnv *e = 0) const;
 
-		void check_exception(JNIEnv *e = 0) const;
 		void throw_exception(const std::string &msg, JNIEnv *e = 0) const;
 		void throw_exception(const std::wstring &msg, JNIEnv *e = 0) const;
+#endif
+
+#if defined(CPPJVM_MFC)
+		jstring string(const CStringA &v, JNIEnv *e = 0) const;
+		jstring string(const CStringW &v, JNIEnv *e = 0) const;
+		CStringW wstring(jstring v, JNIEnv *e = 0) const;
+		CStringA string(jstring v, JNIEnv *e = 0) const;
+
+		void throw_exception(const CStringA &msg, JNIEnv *e = 0) const;
+		void throw_exception(const CStringW &msg, JNIEnv *e = 0) const;
+#endif
+
 	};
 
-	virtual_machine &global_vm();
+	CPPJVM_API const virtual_machine &global_vm();
 #if defined(CPPJVM_VMCREATE)
-	void create_global_vm(const std::string &classPath);
+	CPPJVM_API void create_global_vm(const std::string &classPath);
 #endif
-	virtual_machine *swap_global_vm(virtual_machine *vm);
+	CPPJVM_API virtual_machine *swap_global_vm(virtual_machine *vm);
 	bool global_vm_available();
 
     struct global_init_enlist_base

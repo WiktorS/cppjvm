@@ -20,6 +20,7 @@
 			OutputDirectory="$(SolutionDir)/out/$(ConfigurationName)"
 			IntermediateDirectory=".builds/$(ConfigurationName)"
 			ConfigurationType="4"
+			UseOfMFC="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -39,9 +40,10 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)/include&quot;;&quot;$(JAVA_HOME)/include/win32&quot;;include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_VMSET"
+				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(ProjectDir)\include&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_EXPORTS;CPPJVM_VMSET;CPPJVM_MFC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -103,8 +105,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)/include&quot;;&quot;$(JAVA_HOME)/include/win32&quot;;include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_VMSET"
+				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(ProjectDir)\include&quot;"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_EXPORTS;CPPJVM_VMSET;CPPJVM_MFC"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -172,6 +174,10 @@
 			</File>
 			<File
 				RelativePath=".\include\jvm\global.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\jniutil.hpp"
 				>
 			</File>
 			<File
