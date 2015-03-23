@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)/out/$(ConfigurationName)"
-			IntermediateDirectory=".builds/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\out\$(ConfigurationName)"
+			IntermediateDirectory=".builds\$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="2"
 			CharacterSet="2"
@@ -82,9 +82,10 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)/out/$(ConfigurationName)"
-			IntermediateDirectory=".builds/$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)\out\$(ConfigurationName)"
+			IntermediateDirectory=".builds\$(ConfigurationName)"
 			ConfigurationType="4"
+			UseOfMFC="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
