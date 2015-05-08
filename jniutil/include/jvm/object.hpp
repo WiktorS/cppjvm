@@ -3,6 +3,8 @@
 
 #include <jni.h>
 
+#include "jniutil.hpp"
+
 namespace jvm
 {
 	/*	This class wraps a JNI object reference. Note that it is not
@@ -45,8 +47,8 @@ namespace jvm
             { m_object = 0; }
 
 	protected:
-		void make_global();
-		void delete_global();
+		CPPJVM_API void make_global();
+		CPPJVM_API void delete_global();
 	};
 
 	// Used to distinguish the default contructor in generated wrappers
