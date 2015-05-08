@@ -23,16 +23,12 @@ namespace jvm
 		JavaVM *m_jvm;
 
 	public:
-		virtual_machine()
-			: m_jvm(0) {}
-
+		virtual_machine();
 #if defined(CPPJVM_VMCREATE)
-		virtual_machine(const std::string &classPath)
-			: m_jvm(0) { create(classPath); }
+		virtual_machine(const std::string &classPath);
 #endif
 #if defined(CPPJVM_VMSET)
-		virtual_machine(JavaVM *jvm) 
-			: m_jvm(jvm) {}
+		virtual_machine(JavaVM *jvm);
 #endif
 
 		~virtual_machine()

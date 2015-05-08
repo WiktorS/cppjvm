@@ -8,6 +8,27 @@
 #include <vector>
 #include <algorithm>
 
+
+jvm::virtual_machine::virtual_machine()
+: m_jvm(0) 
+{
+}
+
+#if defined(CPPJVM_VMCREATE)
+jvm::virtual_machine::virtual_machine(const std::string &classPath)
+: m_jvm(0)
+{
+  create(classPath);
+}
+#endif
+
+#if defined(CPPJVM_VMSET)
+jvm::virtual_machine::virtual_machine(JavaVM *jvm)
+: m_jvm(jvm)
+{
+}
+#endif
+
 #if defined(CPPJVM_VMCREATE)
 void jvm::virtual_machine::create(const std::string &classPath)
 {
