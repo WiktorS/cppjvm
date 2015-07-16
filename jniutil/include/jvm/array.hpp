@@ -103,10 +103,10 @@ namespace jvm
 		jsize length() const
 			{ return global_vm().env()->GetArrayLength((array_type)get_impl()); }
 
-		void put(int p, const T *v, size_t c = 1) const
+		void put(int p, const T *v, jsize c = 1) const
 			{ array_traits<T>::put(global_vm().env(), (array_type)get_impl(), p, v, c); }
 
-		void get(int p, T *v, size_t c = 1) const
+		void get(int p, T *v, jsize c = 1) const
 			{ array_traits<T>::get(global_vm().env(), (array_type)get_impl(), p, v, c); }
 
 		class accessor_ : public accessor_base_type
