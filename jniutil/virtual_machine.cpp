@@ -98,7 +98,6 @@ void jvm::virtual_machine::check_exception(JNIEnv *e) const
 	jthrowable x = e->ExceptionOccurred();
 	if (x != 0)
 	{
-		e->ExceptionDescribe();
 		e->ExceptionClear();
 
 		std::string msg("(Exception message not available)");
