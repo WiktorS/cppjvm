@@ -88,6 +88,11 @@ public class ImplementationGenerator extends SourceGenerator {
                 continue;
             if (Modifier.isStatic(m.getModifiers()) && m.getDeclaringClass() != cls())
                 continue;
+            //AbstractList has "size" method duplicates (List and AbstractCollection)
+            if (CppWrap.isMethodDuplicated(methods, m)) {
+                if (m.getDeclaringClass() != cls().getMethod(m.getName(), m.getParameterTypes()).getDeclaringClass())
+                    continue;
+            }
 
             Class<?> returns = m.getReturnType();
             boolean returnsVoid = returns.equals(void.class); 

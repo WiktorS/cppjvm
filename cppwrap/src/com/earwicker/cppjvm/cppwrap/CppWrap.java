@@ -283,6 +283,17 @@ public class CppWrap {
         });
         return sorted;
     }
+
+    public static boolean isMethodDuplicated(Collection<Method> methods, Method referenceMethod) {
+        String referenceSignature = Signature.generate(referenceMethod);
+        for (Method method : methods) {
+            if (method != referenceMethod
+                    && method.getName().equals(referenceMethod.getName())
+                    && referenceSignature.equals(Signature.generate(method)))
+                return true;
+        }
+        return false;
+    }
     
     public static void main(String[] args) throws Exception {
         if (args.length < 2)

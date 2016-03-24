@@ -120,6 +120,11 @@ public class HeaderGenerator extends SourceGenerator {
                 continue;
             if (Modifier.isStatic(m.getModifiers()) && m.getDeclaringClass() != cls())
                 continue;
+            //AbstractList has "size" method duplicates (List and AbstractCollection)
+            if (CppWrap.isMethodDuplicated(methods, m)) {
+                if (m.getDeclaringClass() != cls().getMethod(m.getName(), m.getParameterTypes()).getDeclaringClass())
+                    continue;
+            }
 
             // [static] return-type methodName(params...) [const];
             out().print("    " + 
