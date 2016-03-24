@@ -19,7 +19,7 @@ public class HeaderGenerator extends SourceGenerator {
         declareConversions();
         declareMethods();
         declareFields();
-        declareSpecialStringFeatures();
+        //declareSpecialStringFeatures(); // WS this causes problems with MFC
         endClass();
         
         endNamespace(cls());
@@ -118,6 +118,8 @@ public class HeaderGenerator extends SourceGenerator {
         for (Method m : methods) {
             if (m.isSynthetic())
                 continue;
+            if (Modifier.isStatic(m.getModifiers()) && m.getDeclaringClass() != cls())
+                continue;
 
             // [static] return-type methodName(params...) [const];
             out().print("    " + 
@@ -163,10 +165,8 @@ public class HeaderGenerator extends SourceGenerator {
                 Modifier.isFinal(f.getModifiers())) {
 
                 String val = f.get(null).toString();
-                
-                if (f.getType().equals(Character.TYPE)) {
-                    val = "" + (int)val.charAt(0);
-                }
+
+                val = CppWrap.fixVal(val, f.getType());
                 
                 out().print("    static const " + 
                     CppWrap.cppType(f.getType()) + " " + 
@@ -185,11 +185,13 @@ public class HeaderGenerator extends SourceGenerator {
                 CppWrap.fixName(f.getName()) + "()" +
                 (Modifier.isStatic(f.getModifiers()) ? ";" : "const;")
             );
-            out().print("    " + 
-                (Modifier.isStatic(f.getModifiers()) ? "static void set_" : "void set_") + 
-                CppWrap.fixName(f.getName()) + "(");
-            listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
-            out().println(Modifier.isStatic(f.getModifiers()) ? ");" : ") const;");
+            if (!Modifier.isFinal(f.getModifiers())) {
+                out().print("    " +
+                    (Modifier.isStatic(f.getModifiers()) ? "static void set_" : "void set_") +
+                    CppWrap.fixName(f.getName()) + "(");
+                listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
+                out().println(Modifier.isStatic(f.getModifiers()) ? ");" : ") const;");
+            }
         }
     }    
 }

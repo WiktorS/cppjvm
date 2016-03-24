@@ -86,6 +86,8 @@ public class ImplementationGenerator extends SourceGenerator {
         for (Method m : methods) {
             if (m.isSynthetic())
                 continue;
+            if (Modifier.isStatic(m.getModifiers()) && m.getDeclaringClass() != cls())
+                continue;
 
             Class<?> returns = m.getReturnType();
             boolean returnsVoid = returns.equals(void.class); 
@@ -191,21 +193,23 @@ public class ImplementationGenerator extends SourceGenerator {
                 ? "    return ret;"
                 : "    return " + CppWrap.cppType(f.getType()) + "(ret);");
             out().println("}");
-            
-            out().print("void " +
-                cls().getSimpleName() + "::set_" + 
-                CppWrap.fixName(f.getName()) + "(");
-            listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
-            out().println(isStatic ? ")" : ") const");
-            out().println("{");
-            out().println("    JNIEnv *env = ::jvm::global_vm().env();");
-            out().print("    env->Set" + 
-                (isStatic ? "Static" : "") + fieldFlavour + 
-                (isStatic ? "Field(get_class" : "Field(::jvm::object::get_impl") +
-                "(), getFieldId_" + f.getName() + "(env), ");
-            listParameters(new Class<?>[] { f.getType() }, CALL_UNWRAPPED);
-            out().println(");");
-            out().println("}");
+
+            if (!Modifier.isFinal(f.getModifiers())) {
+                out().print("void " +
+                    cls().getSimpleName() + "::set_" +
+                    CppWrap.fixName(f.getName()) + "(");
+                listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
+                out().println(isStatic ? ")" : ") const");
+                out().println("{");
+                out().println("    JNIEnv *env = ::jvm::global_vm().env();");
+                out().print("    env->Set" +
+                    (isStatic ? "Static" : "") + fieldFlavour +
+                    (isStatic ? "Field(get_class" : "Field(::jvm::object::get_impl") +
+                    "(), getFieldId_" + f.getName() + "(env), ");
+                listParameters(new Class<?>[] { f.getType() }, CALL_UNWRAPPED);
+                out().println(");");
+                out().println("}");
+            }
 
             pos++;
         }

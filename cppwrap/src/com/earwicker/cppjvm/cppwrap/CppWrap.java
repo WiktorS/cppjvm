@@ -25,6 +25,8 @@ public class CppWrap {
         reserved.add("not");
         reserved.add("NULL");
         reserved.add("register");
+        reserved.add("min");
+        reserved.add("max");
         
         primitives = new java.util.HashMap<Class<?>, String>();
         primitives.put(void.class, "void");
@@ -76,6 +78,13 @@ public class CppWrap {
 
     public static String fixName(String name) {
         return reserved.contains(name) ? name + "_" : name;
+    }
+
+    public static String fixVal(String val, Class<?> type) {
+        if (type.equals(Integer.TYPE) && val.equals(String.valueOf(Integer.MIN_VALUE)))
+            return "-2147483647-1"; // This fixes problem with -2147483648 on MSVC
+        if (type.equals(Character.TYPE)) return "" + (int) val.charAt(0);
+        return val;
     }
 
     public static void save(String path, String content) throws Exception {
