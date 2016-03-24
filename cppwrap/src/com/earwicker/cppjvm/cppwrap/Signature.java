@@ -3,8 +3,8 @@ package com.earwicker.cppjvm.cppwrap;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-public class Signature {
-    private static java.util.HashMap<String, String> primitives;
+class Signature {
+    private static final java.util.HashMap<String, String> primitives;
 
     static {
         primitives = new java.util.HashMap<String, String>();
@@ -19,29 +19,28 @@ public class Signature {
         primitives.put("char", "C");
     }
 
-    public static String generate(Class[] p, String r) {
-        StringBuffer b = new StringBuffer();
+    private static String generate(Class[] p, String r) {
+        StringBuilder b = new StringBuilder();
 
         b.append("(");
 
-        for (int n = 0; n < p.length; n++)
-            b.append(generate(p[n]));
+        for (Class aP : p) b.append(generate(aP));
 
         b.append(")");
         b.append(r);
         return b.toString();
     }
 
-    public static String generate(Method m) {
+    static String generate(Method m) {
         return generate(m.getParameterTypes(),
             generate(m.getReturnType()));
     }
 
-    public static String generate(Constructor m) {
+    static String generate(Constructor m) {
         return generate(m.getParameterTypes(), "V");
     }
 
-    public static String generate(Class c) {
+    static String generate(Class c) {
         if (c.isPrimitive())
             return primitives.get(c.toString());
         else if (c.isArray())

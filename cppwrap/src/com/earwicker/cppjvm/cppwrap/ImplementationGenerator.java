@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 
-public class ImplementationGenerator extends SourceGenerator {
+class ImplementationGenerator extends SourceGenerator {
 
-    int suffix = 0; // in case I ever want multiple definitions per file
+    private final int suffix = 0; // in case I ever want multiple definitions per file
 
     public void generate() throws Exception {
         include(cls()); // include our own header, obviously
@@ -22,7 +22,7 @@ public class ImplementationGenerator extends SourceGenerator {
         endNamespace(cls());
     }
 
-    protected void classInfo() throws Exception {
+    private void classInfo() throws Exception {
         out().println("static jclass cached_class" + suffix + " = 0;");
         out().println("jclass " + cls().getSimpleName() + "::get_class()");
         out().println("{");
@@ -41,7 +41,7 @@ public class ImplementationGenerator extends SourceGenerator {
         out().println("static jmethodID cached_methods" + suffix + "[" + (cls().getMethods().length + 1) + "];");
     }
 
-    protected void defineConstructors() throws Exception {
+    private void defineConstructors() throws Exception {
         int pos = 0;
         for (Constructor<?> ctor : CppWrap.sortConstructors(cls().getConstructors())) {
             // void ClassName::new_(params...)
@@ -72,7 +72,7 @@ public class ImplementationGenerator extends SourceGenerator {
         }
     }
 
-    protected void defineConversions() throws Exception {
+    private void defineConversions() throws Exception {
         for (Class<?> st : CppWrap.getSuperTypes(cls())) {
             out().println(cls().getSimpleName() + "::operator " + CppWrap.cppType(st) + "() const");
             out().println("{");
@@ -81,7 +81,7 @@ public class ImplementationGenerator extends SourceGenerator {
         }
     }
 
-    protected void defineMethods() throws Exception {
+    private void defineMethods() throws Exception {
         int pos = 0;
         Collection<Method> methods = CppWrap.sortMethods(cls().getMethods());
         for (Method m : methods) {
@@ -151,7 +151,7 @@ public class ImplementationGenerator extends SourceGenerator {
         }
     }
 
-    void defineFields() throws Exception {
+    private void defineFields() throws Exception {
         int pos = 0;
         for (Field f : CppWrap.sortFields(cls().getFields())) {
             if (isFieldHidden(f))

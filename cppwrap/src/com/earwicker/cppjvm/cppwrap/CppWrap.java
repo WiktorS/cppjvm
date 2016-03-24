@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class CppWrap {
-    private static java.util.HashMap<Class<?>, String> primitives;
-    private static java.util.HashSet<String> reserved;
+    private static final java.util.HashMap<Class<?>, String> primitives;
+    private static final java.util.HashSet<String> reserved;
 
     private static PrintWriter log;
 
@@ -42,7 +42,7 @@ public class CppWrap {
             log.println(str);
     }
 
-    public static String nestedName(Class<?> cls, boolean namespace) {
+    private static String nestedName(Class<?> cls, boolean namespace) {
 
         String name = cls.getSimpleName();
 
@@ -59,7 +59,7 @@ public class CppWrap {
         return name;
     }
 
-    public static String cppType(Class<?> j) throws Exception {
+    static String cppType(Class<?> j) throws Exception {
         if (j == null)
             return "jobject";
 
@@ -74,42 +74,42 @@ public class CppWrap {
         return "::" + nestedName(j, true);
     }
 
-    public static boolean isWrapped(Class<?> cls) {
+    static boolean isWrapped(Class<?> cls) {
         return !cls.isPrimitive();
     }
 
-    public static String fixName(String name) {
+    static String fixName(String name) {
         return reserved.contains(name) ? name + "_" : name;
     }
 
-    public static String fixVal(String val, Class<?> type) {
+    static String fixVal(String val, Class<?> type) {
         if (type.equals(Integer.TYPE) && val.equals(String.valueOf(Integer.MIN_VALUE)))
             return "-2147483647-1"; // This fixes problem with -2147483648 on MSVC
         if (type.equals(Character.TYPE)) return "" + (int) val.charAt(0);
         return val;
     }
 
-    public static void save(String path, String content) throws Exception {
+    private static void save(String path, String content) throws Exception {
         new File(path).getParentFile().mkdirs();
         PrintWriter writer = new PrintWriter(path);
         writer.print(content);
         writer.close();
     }
 
-    public static String load(String path) throws Exception {
+    private static String load(String path) throws Exception {
         if (!new File(path).exists())
             return "$$$empty$$$";
         StringBuilder fileData = new StringBuilder();
         BufferedReader reader = new BufferedReader(new FileReader(path));
         char[] buf = new char[1024];
-        int numRead = 0;
+        int numRead;
         while ((numRead = reader.read(buf)) != -1)
             fileData.append(buf, 0, numRead);
         reader.close();
         return fileData.toString();
     }
 
-    public static int saveIfDifferent(String path, String content) throws Exception {
+    private static int saveIfDifferent(String path, String content) throws Exception {
         String oldContent = load(path);
         if (!oldContent.equals(content)) {
             println("Saving new version: " + path);
@@ -119,8 +119,8 @@ public class CppWrap {
         return 0;
     }
 
-    public static int generate(Class<?> cls, File out,
-                               List<String> files, boolean generating) throws Exception {
+    private static int generate(Class<?> cls, File out,
+                                List<String> files, boolean generating) throws Exception {
         int generated = 0;
         if (!isWrapped(cls))
             return generated;
@@ -149,11 +149,10 @@ public class CppWrap {
     }
 
     // Returns a list of types that the given type is assignment-compatible with
-    public static Collection<Class<?>> getSuperTypes(Class<?> cls) {
+    static Collection<Class<?>> getSuperTypes(Class<?> cls) {
         List<Class<?>> compatibleTypes = new ArrayList<Class<?>>();
 
-        for (Class<?> i : cls.getInterfaces())
-            compatibleTypes.add(i);
+        Collections.addAll(compatibleTypes, cls.getInterfaces());
 
         for (Class<?> superCls = cls.getSuperclass();
              superCls != null; superCls = superCls.getSuperclass())
@@ -164,7 +163,7 @@ public class CppWrap {
 
     // Recursively builds the set of types that are referred to in the definition of
     // the given type.
-    public static void getRequiredTypes(
+    private static void getRequiredTypes(
         Class<?> cls, Set<Class<?>> required,
         Map<Class<?>, Integer> minDepths, int currentDepth) {
 
@@ -219,11 +218,11 @@ public class CppWrap {
         }
     }
 
-    public static void getAllRequiredTypes(Class<?> cls, Set<Class<?>> required) {
+    private static void getAllRequiredTypes(Class<?> cls, Set<Class<?>> required) {
         getRequiredTypes(cls, required, null, 0);
     }
 
-    public static Collection<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
+    static Collection<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
 
         println("Directly required types for: " + cls.getName());
 
@@ -243,7 +242,7 @@ public class CppWrap {
         return sortClasses(pruned);
     }
 
-    public static List<Class<?>> sortClasses(Collection<Class<?>> classes) {
+    private static List<Class<?>> sortClasses(Collection<Class<?>> classes) {
         List<Class<?>> sorted = new ArrayList<Class<?>>(classes);
         Collections.sort(sorted, new Comparator<Class<?>>() {
             public int compare(Class<?> arg0, Class<?> arg1) {
@@ -253,7 +252,7 @@ public class CppWrap {
         return sorted;
     }
 
-    public static List<Constructor<?>> sortConstructors(Constructor<?>[] constructors) {
+    static List<Constructor<?>> sortConstructors(Constructor<?>[] constructors) {
         List<Constructor<?>> sorted = Arrays.asList(constructors);
         Collections.sort(sorted, new Comparator<Constructor<?>>() {
             public int compare(Constructor<?> arg0, Constructor<?> arg1) {
@@ -263,7 +262,7 @@ public class CppWrap {
         return sorted;
     }
 
-    public static Collection<Method> sortMethods(Method[] methods) {
+    static Collection<Method> sortMethods(Method[] methods) {
         List<Method> sorted = Arrays.asList(methods);
         Collections.sort(sorted, new Comparator<Method>() {
             public int compare(Method arg0, Method arg1) {
@@ -274,7 +273,7 @@ public class CppWrap {
     }
 
 
-    public static Collection<Field> sortFields(Field[] fields) {
+    static Collection<Field> sortFields(Field[] fields) {
         List<Field> sorted = Arrays.asList(fields);
         Collections.sort(sorted, new Comparator<Field>() {
             public int compare(Field arg0, Field arg1) {
@@ -284,7 +283,7 @@ public class CppWrap {
         return sorted;
     }
 
-    public static boolean isMethodDuplicated(Collection<Method> methods, Method referenceMethod) {
+    static boolean isMethodDuplicated(Collection<Method> methods, Method referenceMethod) {
         String referenceSignature = Signature.generate(referenceMethod);
         for (Method method : methods) {
             if (method != referenceMethod

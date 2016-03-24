@@ -6,7 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 
-public class HeaderGenerator extends SourceGenerator {
+class HeaderGenerator extends SourceGenerator {
 
     public void generate() throws Exception {
         beginIncludeGuard();
@@ -27,7 +27,7 @@ public class HeaderGenerator extends SourceGenerator {
         endIncludeGuard();
     }
 
-    protected void forwardDeclare(Class<?> cls) {
+    private void forwardDeclare(Class<?> cls) {
         if (!CppWrap.isWrapped(cls))
             return;
 
@@ -37,29 +37,29 @@ public class HeaderGenerator extends SourceGenerator {
         out().println();
     }
 
-    protected void beginIncludeGuard() {
+    private void beginIncludeGuard() {
         String guard = "INCLUDED_CPPJVM_" + cls().getName().replace('.', '_').toUpperCase();
         out().println("#ifndef " + guard);
         out().println("#define " + guard);
     }
 
-    protected void endIncludeGuard() {
+    private void endIncludeGuard() {
         out().println("#endif");
     }
 
-    protected void globalIncludes() {
+    private void globalIncludes() {
         out().println("#include <jvm/virtual_machine.hpp>");
         out().println("#include <jvm/object.hpp>");
         out().println("#include <jvm/array.hpp>");
     }
 
-    protected void forwardDeclareRequiredTypes() throws Exception {
+    private void forwardDeclareRequiredTypes() throws Exception {
         for (Class<?> required : CppWrap.getDirectlyRequiredTypes(cls())) {
             forwardDeclare(required);
         }
     }
 
-    protected void beginClass() {
+    private void beginClass() {
         out().println();
         out().println("class " + cls().getSimpleName() + " : public ::jvm::object");
         out().println("{");
@@ -78,11 +78,11 @@ public class HeaderGenerator extends SourceGenerator {
         out().println("        : object(other.get_impl()) {}");
     }
 
-    protected void endClass() {
+    private void endClass() {
         out().println("};");
     }
 
-    protected void declareConstructors() throws Exception {
+    private void declareConstructors() throws Exception {
         for (Constructor<?> ctor : CppWrap.sortConstructors(cls().getConstructors())) {
             Class<?>[] params = ctor.getParameterTypes();
 
@@ -108,13 +108,13 @@ public class HeaderGenerator extends SourceGenerator {
         }
     }
 
-    protected void declareConversions() throws Exception {
+    private void declareConversions() throws Exception {
         for (Class<?> st : CppWrap.getSuperTypes(cls())) {
             out().println("    operator " + CppWrap.cppType(st) + "() const;");
         }
     }
 
-    protected void declareMethods() throws Exception {
+    private void declareMethods() throws Exception {
         Collection<Method> methods = CppWrap.sortMethods(cls().getMethods());
         for (Method m : methods) {
             if (m.isSynthetic())
@@ -159,7 +159,7 @@ public class HeaderGenerator extends SourceGenerator {
         out().println("        { return ::jvm::global_vm().wstring((jstring)get_impl()); }");
     }
 
-    void declareFields() throws Exception {
+    private void declareFields() throws Exception {
         for (Field f : CppWrap.sortFields(cls().getFields())) {
             if (isFieldHidden(f))
                 continue;

@@ -8,14 +8,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class SourceGenerator {
-    protected static final int DECLARE_TYPES = 0;
-    protected static final int CALL_WRAPPED = 1;
-    protected static final int CALL_UNWRAPPED = 2;
+abstract class SourceGenerator {
+    static final int DECLARE_TYPES = 0;
+    static final int CALL_WRAPPED = 1;
+    static final int CALL_UNWRAPPED = 2;
     private PrintWriter writer;
     private Class<?> source;
 
-    public String toString(Class<?> cls) throws Exception {
+    String toString(Class<?> cls) throws Exception {
         source = cls;
         final Writer result = new StringWriter();
         writer = new PrintWriter(result);
@@ -28,7 +28,7 @@ public abstract class SourceGenerator {
         return writer;
     }
 
-    protected Class<?> cls() {
+    Class<?> cls() {
         return source;
     }
 
@@ -49,13 +49,13 @@ public abstract class SourceGenerator {
             out().println("#include <" + cls.getName().replace('.', '/').replace('$', '/') + ".hpp>");
     }
 
-    protected void includeRequiredTypes() throws Exception {
+    void includeRequiredTypes() throws Exception {
         for (Class<?> required : CppWrap.getDirectlyRequiredTypes(cls())) {
             include(required);
         }
     }
 
-    protected void beginNamespace(Class<?> cls) {
+    void beginNamespace(Class<?> cls) {
 
         out().println("// name: " + cls.getName());
         String[] namespaces = cls.getName().split("\\.");
@@ -73,7 +73,7 @@ public abstract class SourceGenerator {
         }
     }
 
-    protected void endNamespace(Class<?> cls) {
+    void endNamespace(Class<?> cls) {
 
         int count = cls.getName().split("\\.").length - 1;
         for (Class<?> c = cls.getDeclaringClass(); c != null; c = c.getDeclaringClass()) {
@@ -86,7 +86,7 @@ public abstract class SourceGenerator {
         out().println();
     }
 
-    protected void listParameters(Class<?>[] params, int mode) throws Exception {
+    void listParameters(Class<?>[] params, int mode) throws Exception {
         int pos = 0;
         for (Class<?> p : params) {
             pos++;
@@ -102,7 +102,7 @@ public abstract class SourceGenerator {
         }
     }
 
-    protected boolean isFieldHidden(Field field) {
+    boolean isFieldHidden(Field field) {
         for (Field f : cls().getFields()) {
             if (!f.equals(field) &&
                 f.getName().equals(field.getName()) &&
