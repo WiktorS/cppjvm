@@ -163,63 +163,58 @@ public class CppWrap {
 
     // Recursively builds the set of types that are referred to in the definition of
     // the given type.
-    private static void getRequiredTypes(
-        Class<?> cls, Set<Class<?>> required,
-        Map<Class<?>, Integer> minDepths, int currentDepth) {
-
+    private static void getRequiredTypes(Class<?> cls, Set<Class<?>> required, int currentDepth, Integer maxDepth) {
         if (cls.isArray()) {
-            getRequiredTypes(cls.getComponentType(), required, minDepths, currentDepth); // same depth
+            getRequiredTypes(cls.getComponentType(), required, currentDepth, maxDepth); // same depth
             return;
-        }
-
-        if (minDepths != null) {
-            Integer oldDepth = minDepths.get(cls);
-            if ((oldDepth == null) || (oldDepth > currentDepth)) {
-                minDepths.put(cls, currentDepth);
-            }
         }
 
         println("Considering: " + cls.getName());
 
-        if (cls.isPrimitive() || required.contains(cls)) {
-            if (cls.isPrimitive())
-                println("Ignoring primitive: " + cls.getName());
+        if (cls.isPrimitive()) {
+            println("Ignoring primitive: " + cls.getName());
+            return;
+        }
 
-            if (required.contains(cls))
-                println("Ignoring already found: " + cls.getName());
-
+        if (required.contains(cls)) {
+            println("Ignoring already found: " + cls.getName());
             return;
         }
 
         println("Requires: " + cls.getName());
 
         required.add(cls);
-        println("Supertypes of: " + cls.getName());
-        for (Class<?> st : getSuperTypes(cls))
-            getRequiredTypes(st, required, minDepths, currentDepth + 1);
 
-        println("Constructors of: " + cls.getName());
-        for (Constructor<?> ctor : cls.getConstructors()) {
-            for (Class<?> p : ctor.getParameterTypes())
-                getRequiredTypes(p, required, minDepths, currentDepth + 1);
-        }
+        if (maxDepth == null || currentDepth < maxDepth) {
 
-        println("Methods of: " + cls.getName());
-        for (Method m : cls.getMethods()) {
-            println("Method " + cls.getName() + "." + m.getName());
-            getRequiredTypes(m.getReturnType(), required, minDepths, currentDepth + 1);
-            for (Class<?> p : m.getParameterTypes())
-                getRequiredTypes(p, required, minDepths, currentDepth + 1);
-        }
+            for (Class<?> st : CppWrap.getSuperTypes(cls)) {
+                println("Super classes of: " + cls.getName());
+                getRequiredTypes(st, required, currentDepth + 1, maxDepth);
+            }
 
-        for (Class<?> c : cls.getClasses()) {
-            println("Nested classes of: " + cls.getName());
-            getRequiredTypes(c, required, minDepths, currentDepth); // same depth
+            println("Constructors of: " + cls.getName());
+            for (Constructor<?> ctor : cls.getConstructors()) {
+                for (Class<?> p : ctor.getParameterTypes())
+                    getRequiredTypes(p, required, currentDepth + 1, maxDepth);
+            }
+
+            println("Methods of: " + cls.getName());
+            for (Method m : cls.getMethods()) {
+                println("Method " + cls.getName() + "." + m.getName());
+                getRequiredTypes(m.getReturnType(), required, currentDepth + 1, maxDepth);
+                for (Class<?> p : m.getParameterTypes())
+                    getRequiredTypes(p, required, currentDepth + 1, maxDepth);
+            }
+
+            for (Class<?> c : cls.getClasses()) {
+                println("Nested classes of: " + cls.getName());
+                getRequiredTypes(c, required, currentDepth, maxDepth); // same depth
+            }
         }
     }
 
     private static void getAllRequiredTypes(Class<?> cls, Set<Class<?>> required) {
-        getRequiredTypes(cls, required, null, 0);
+        getRequiredTypes(cls, required, 0, null);
     }
 
     static Collection<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
@@ -227,19 +222,9 @@ public class CppWrap {
         println("Directly required types for: " + cls.getName());
 
         HashSet<Class<?>> req = new HashSet<Class<?>>();
-        Map<Class<?>, Integer> minDepths = new HashMap<Class<?>, Integer>();
-        getRequiredTypes(cls, req, minDepths, 0);
+        getRequiredTypes(cls, req, 0, 1);
 
-        List<Class<?>> pruned = new ArrayList<Class<?>>();
-        for (Class<?> c : req) {
-            int minDepth = minDepths.get(c);
-            println("    " + minDepth + ": " + c.getName());
-            if (minDepth <= 2) {
-                pruned.add(c);
-            }
-        }
-
-        return sortClasses(pruned);
+        return sortClasses(req);
     }
 
     private static List<Class<?>> sortClasses(Collection<Class<?>> classes) {
