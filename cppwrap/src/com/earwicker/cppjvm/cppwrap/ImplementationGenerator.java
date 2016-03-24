@@ -42,7 +42,7 @@ public class ImplementationGenerator extends SourceGenerator {
 
     protected void defineConstructors() throws Exception {
         int pos = 0;
-        for (Constructor<?> ctor : cls().getConstructors()) {
+        for (Constructor<?> ctor : CppWrap.sortConstructors(cls().getConstructors())) {
             // void ClassName::new_(params...)
             out().print("void " + cls().getSimpleName() + "::new_(");
             listParameters(ctor.getParameterTypes(), DECLARE_TYPES);
@@ -82,7 +82,8 @@ public class ImplementationGenerator extends SourceGenerator {
 
     protected void defineMethods() throws Exception {
         int pos = 0;
-        for (Method m : cls().getMethods()) {
+        Collection<Method> methods = CppWrap.sortMethods(cls().getMethods());
+        for (Method m : methods) {
             if (m.isSynthetic())
                 continue;
 
@@ -144,7 +145,7 @@ public class ImplementationGenerator extends SourceGenerator {
     
     void defineFields() throws Exception {
         int pos = 0;
-        for (Field f : cls().getFields()) {
+        for (Field f : CppWrap.sortFields(cls().getFields())) {
             if (isFieldHidden(f))
                 continue;
                 

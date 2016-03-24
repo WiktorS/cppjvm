@@ -139,7 +139,7 @@ public class CppWrap {
     }
 
     // Returns a list of types that the given type is assignment-compatible with
-    public static Iterable<Class<?>> getSuperTypes(Class<?> cls) {
+    public static Collection<Class<?>> getSuperTypes(Class<?> cls) {
         List<Class<?>> compatibleTypes = new ArrayList<Class<?>>();
 
         for (Class<?> i : cls.getInterfaces())
@@ -149,7 +149,7 @@ public class CppWrap {
              superCls != null; superCls = superCls.getSuperclass()) 
         	compatibleTypes.add(superCls);
 
-        return compatibleTypes;
+        return sortClasses(compatibleTypes);
     }
 
     // Recursively builds the set of types that are referred to in the definition of
@@ -214,7 +214,7 @@ public class CppWrap {
         getRequiredTypes(cls, required, null, 0);
     }
 
-    public static Iterable<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
+    public static Collection<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
     
         println("Directly required types for: " + cls.getName());
     
@@ -240,6 +240,37 @@ public class CppWrap {
 			public int compare(Class<?> arg0, Class<?> arg1) {
 				return arg0.getName().compareTo(arg1.getName());
 			}
+        });
+        return sorted;
+    }
+
+    public static List<Constructor<?>> sortConstructors(Constructor<?>[] constructors) {
+        List<Constructor<?>> sorted = Arrays.asList(constructors);
+        Collections.sort(sorted, new Comparator<Constructor<?>>() {
+            public int compare(Constructor<?> arg0, Constructor<?> arg1) {
+                return arg0.toGenericString().compareTo(arg1.toGenericString());
+            }
+        });
+        return sorted;
+    }
+
+    public static Collection<Method> sortMethods(Method[] methods) {
+        List<Method> sorted = Arrays.asList(methods);
+        Collections.sort(sorted, new Comparator<Method>() {
+            public int compare(Method arg0, Method arg1) {
+                return arg0.toGenericString().compareTo(arg1.toGenericString());
+            }
+        });
+        return sorted;
+    }
+
+
+    public static Collection<Field> sortFields(Field[] fields) {
+        List<Field> sorted = Arrays.asList(fields);
+        Collections.sort(sorted, new Comparator<Field>() {
+            public int compare(Field arg0, Field arg1) {
+                return arg0.toGenericString().compareTo(arg1.toGenericString());
+            }
         });
         return sorted;
     }

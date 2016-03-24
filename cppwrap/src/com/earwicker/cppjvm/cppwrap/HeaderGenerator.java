@@ -82,7 +82,7 @@ public class HeaderGenerator extends SourceGenerator {
     }
 
     protected void declareConstructors() throws Exception {
-        for (Constructor<?> ctor : cls().getConstructors()) {
+        for (Constructor<?> ctor : CppWrap.sortConstructors(cls().getConstructors())) {
             Class<?>[] params = ctor.getParameterTypes();
 
             // void new_(params...);
@@ -114,7 +114,8 @@ public class HeaderGenerator extends SourceGenerator {
     }
 
     protected void declareMethods() throws Exception {
-        for (Method m : cls().getMethods()) {
+        Collection<Method> methods = CppWrap.sortMethods(cls().getMethods());
+        for (Method m : methods) {
             if (m.isSynthetic())
                 continue;
 
@@ -151,7 +152,7 @@ public class HeaderGenerator extends SourceGenerator {
     }
 
     void declareFields() throws Exception {
-        for (Field f : cls().getFields()) {
+        for (Field f : CppWrap.sortFields(cls().getFields())) {
             if (isFieldHidden(f))
                 continue;
 
