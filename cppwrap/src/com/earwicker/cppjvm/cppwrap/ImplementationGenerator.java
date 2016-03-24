@@ -1,9 +1,10 @@
-
 package com.earwicker.cppjvm.cppwrap;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
 
 public class ImplementationGenerator extends SourceGenerator {
 
@@ -54,19 +55,19 @@ public class ImplementationGenerator extends SourceGenerator {
             out().println("    jmethodID i = cached_constructors" + suffix + "[" + pos + "];");
             out().println("    if (i == 0)");
             out().println("    {");
-            out().println("        i = env->GetMethodID(get_class(), \"<init>\", \"" + 
-                          Signature.generate(ctor) + "\");");
+            out().println("        i = env->GetMethodID(get_class(), \"<init>\", \"" +
+                Signature.generate(ctor) + "\");");
             out().println("        cached_constructors" + suffix + "[" + pos + "] = i;");
             out().println("    }");
             out().print(
-                "    ::jvm::object::put_impl(env->NewObject(get_class(), i" + 
-                (ctor.getParameterTypes().length != 0 ? ", " : "")
+                "    ::jvm::object::put_impl(env->NewObject(get_class(), i" +
+                    (ctor.getParameterTypes().length != 0 ? ", " : "")
             );
             listParameters(ctor.getParameterTypes(), CALL_UNWRAPPED);
             out().println("));");
             out().println("    ::jvm::global_vm().check_exception(env);");
             out().println("}");
-            
+
             pos++;
         }
     }
@@ -74,9 +75,9 @@ public class ImplementationGenerator extends SourceGenerator {
     protected void defineConversions() throws Exception {
         for (Class<?> st : CppWrap.getSuperTypes(cls())) {
             out().println(cls().getSimpleName() + "::operator " + CppWrap.cppType(st) + "() const");
-        	out().println("{");
-        	out().println("    return " + CppWrap.cppType(st) + "(get_impl());");
-        	out().println("}");
+            out().println("{");
+            out().println("    return " + CppWrap.cppType(st) + "(get_impl());");
+            out().println("}");
         }
     }
 
@@ -95,12 +96,12 @@ public class ImplementationGenerator extends SourceGenerator {
             }
 
             Class<?> returns = m.getReturnType();
-            boolean returnsVoid = returns.equals(void.class); 
+            boolean returnsVoid = returns.equals(void.class);
             boolean isStatic = Modifier.isStatic(m.getModifiers());
             Class<?>[] params = m.getParameterTypes();
 
             // return-type ClassName::methodName(params...) [const]
-            out().print(CppWrap.cppType(returns) + " " + 
+            out().print(CppWrap.cppType(returns) + " " +
                 cls().getSimpleName() + "::" +
                 CppWrap.fixName(m.getName()) + "(");
             listParameters(params, DECLARE_TYPES);
@@ -114,25 +115,25 @@ public class ImplementationGenerator extends SourceGenerator {
             out().println("    {");
             out().println("        i = env->Get" +
                 (isStatic ? "Static" : "") +
-                "MethodID(get_class(), \"" + m.getName() + 
+                "MethodID(get_class(), \"" + m.getName() +
                 "\", \"" + Signature.generate(m) + "\");");
             out().println("        cached_methods" + suffix + "[" + pos + "] = i;");
             out().println("    }");
 
-            String returnFlavour = returns.isPrimitive() 
-                ? (Character.toUpperCase(returns.toString().charAt(0)) + 
-                   returns.toString().substring(1))
+            String returnFlavour = returns.isPrimitive()
+                ? (Character.toUpperCase(returns.toString().charAt(0)) +
+                returns.toString().substring(1))
                 : "Object";
 
-            // [cpp-type ret = ]env->Call[Static]return-flavourMethod(...        
-            out().print("    " + 
-                (returnsVoid 
-                    ? "" 
+            // [cpp-type ret = ]env->Call[Static]return-flavourMethod(...
+            out().print("    " +
+                (returnsVoid
+                    ? ""
                     : (CppWrap.cppType(returns) + " ret" + (CppWrap.isWrapped(returns) ? "(" : " = "))
                 ) +
-                "env->Call" + 
-                (isStatic ? "Static" : "") + returnFlavour + 
-                (isStatic ? "Method(get_class(), i" : "Method(::jvm::object::get_impl(), i") + 
+                "env->Call" +
+                (isStatic ? "Static" : "") + returnFlavour +
+                (isStatic ? "Method(get_class(), i" : "Method(::jvm::object::get_impl(), i") +
                 (params.length != 0 ? ", " : "")
             );
             listParameters(params, CALL_UNWRAPPED);
@@ -140,7 +141,7 @@ public class ImplementationGenerator extends SourceGenerator {
             out().println("    ::jvm::global_vm().check_exception(env);");
 
             if (!returnsVoid) {
-                out().println(CppWrap.isWrapped(returns) 
+                out().println(CppWrap.isWrapped(returns)
                     ? "    return ret;"
                     : "    return " + CppWrap.cppType(returns) + "(ret);");
             }
@@ -149,13 +150,13 @@ public class ImplementationGenerator extends SourceGenerator {
             pos++;
         }
     }
-    
+
     void defineFields() throws Exception {
         int pos = 0;
         for (Field f : CppWrap.sortFields(cls().getFields())) {
             if (isFieldHidden(f))
                 continue;
-                
+
             boolean isStatic = Modifier.isStatic(f.getModifiers());
 
             out().println("static jfieldID getFieldId_" + f.getName() + "(JNIEnv *env)");
@@ -165,36 +166,36 @@ public class ImplementationGenerator extends SourceGenerator {
             out().println("    {");
             out().println("        i = env->Get" +
                 (isStatic ? "Static" : "") +
-                "FieldID(" + cls().getSimpleName() + 
-                "::get_class(), \"" + f.getName() + 
+                "FieldID(" + cls().getSimpleName() +
+                "::get_class(), \"" + f.getName() +
                 "\", \"" + Signature.generate(f.getType()) + "\");");
             out().println("        cached_fields" + suffix + "[" + pos + "] = i;");
             out().println("    }");
             out().println("    return i;");
             out().println("}");
 
-            String fieldFlavour = f.getType().isPrimitive() 
-                ? (Character.toUpperCase(f.getType().toString().charAt(0)) + 
-                   f.getType().toString().substring(1))
+            String fieldFlavour = f.getType().isPrimitive()
+                ? (Character.toUpperCase(f.getType().toString().charAt(0)) +
+                f.getType().toString().substring(1))
                 : "Object";
-        
+
             out().println(
-                CppWrap.cppType(f.getType()) + " " +                 
-                cls().getSimpleName() + "::get_" + 
-                CppWrap.fixName(f.getName()) + "()" +
-                (isStatic ? "" : "const")
+                CppWrap.cppType(f.getType()) + " " +
+                    cls().getSimpleName() + "::get_" +
+                    CppWrap.fixName(f.getName()) + "()" +
+                    (isStatic ? "" : "const")
             );
             out().println("{");
             out().println("    JNIEnv *env = ::jvm::global_vm().env();");
-            out().println("    " + 
-                CppWrap.cppType(f.getType()) + " ret" + 
-                (CppWrap.isWrapped(f.getType()) ? "(" : " = ") + "env->Get" + 
-                (isStatic ? "Static" : "") + fieldFlavour + 
+            out().println("    " +
+                CppWrap.cppType(f.getType()) + " ret" +
+                (CppWrap.isWrapped(f.getType()) ? "(" : " = ") + "env->Get" +
+                (isStatic ? "Static" : "") + fieldFlavour +
                 (isStatic ? "Field(get_class" : "Field(::jvm::object::get_impl") +
-                "(), getFieldId_" + f.getName() + "(env)" + 
+                "(), getFieldId_" + f.getName() + "(env)" +
                 (CppWrap.isWrapped(f.getType()) ? "));" : ");"));
 
-            out().println(CppWrap.isWrapped(f.getType()) 
+            out().println(CppWrap.isWrapped(f.getType())
                 ? "    return ret;"
                 : "    return " + CppWrap.cppType(f.getType()) + "(ret);");
             out().println("}");
@@ -203,7 +204,7 @@ public class ImplementationGenerator extends SourceGenerator {
                 out().print("void " +
                     cls().getSimpleName() + "::set_" +
                     CppWrap.fixName(f.getName()) + "(");
-                listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
+                listParameters(new Class<?>[]{f.getType()}, DECLARE_TYPES);
                 out().println(isStatic ? ")" : ") const");
                 out().println("{");
                 out().println("    JNIEnv *env = ::jvm::global_vm().env();");
@@ -211,7 +212,7 @@ public class ImplementationGenerator extends SourceGenerator {
                     (isStatic ? "Static" : "") + fieldFlavour +
                     (isStatic ? "Field(get_class" : "Field(::jvm::object::get_impl") +
                     "(), getFieldId_" + f.getName() + "(env), ");
-                listParameters(new Class<?>[] { f.getType() }, CALL_UNWRAPPED);
+                listParameters(new Class<?>[]{f.getType()}, CALL_UNWRAPPED);
                 out().println(");");
                 out().println("}");
             }

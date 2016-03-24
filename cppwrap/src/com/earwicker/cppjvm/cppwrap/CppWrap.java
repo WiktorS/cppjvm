@@ -1,19 +1,16 @@
-
 package com.earwicker.cppjvm.cppwrap;
 
-import java.lang.reflect.*;
-import java.util.*;
 import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class CppWrap {
     private static java.util.HashMap<Class<?>, String> primitives;
     private static java.util.HashSet<String> reserved;
 
     private static PrintWriter log;
-    private static void println(String str) {
-        if (log != null)
-            log.println(str);
-    }
 
     static {
         reserved = new java.util.HashSet<String>();
@@ -27,7 +24,7 @@ public class CppWrap {
         reserved.add("register");
         reserved.add("min");
         reserved.add("max");
-        
+
         primitives = new java.util.HashMap<Class<?>, String>();
         primitives.put(void.class, "void");
         primitives.put(boolean.class, "jboolean");
@@ -40,8 +37,13 @@ public class CppWrap {
         primitives.put(char.class, "jchar");
     }
 
+    private static void println(String str) {
+        if (log != null)
+            log.println(str);
+    }
+
     public static String nestedName(Class<?> cls, boolean namespace) {
-        
+
         String name = cls.getSimpleName();
 
         while (cls.getDeclaringClass() != null) {
@@ -53,7 +55,7 @@ public class CppWrap {
             String packageName = cls.getPackage().getName();
             name = packageName.replaceAll("\\.", "::") + "::" + name;
         }
-        
+
         return name;
     }
 
@@ -100,7 +102,7 @@ public class CppWrap {
         StringBuilder fileData = new StringBuilder();
         BufferedReader reader = new BufferedReader(new FileReader(path));
         char[] buf = new char[1024];
-        int numRead=0;
+        int numRead = 0;
         while ((numRead = reader.read(buf)) != -1)
             fileData.append(buf, 0, numRead);
         reader.close();
@@ -117,24 +119,23 @@ public class CppWrap {
         return 0;
     }
 
-    public static int generate(Class<?> cls, File out, 
-        List<String> files, boolean generating) throws Exception
-    {
-    	int generated = 0;
+    public static int generate(Class<?> cls, File out,
+                               List<String> files, boolean generating) throws Exception {
+        int generated = 0;
         if (!isWrapped(cls))
             return generated;
 
         char sl = File.separatorChar;
 
-        String headerName = out.getPath() + sl + "include" + sl + 
+        String headerName = out.getPath() + sl + "include" + sl +
             cls.getName().replace('.', sl).replace('$', sl) + ".hpp";
 
         if (generating) {
             generated += saveIfDifferent(headerName,
                 new HeaderGenerator().toString(cls));
         }
-            
-        String implName = out.getPath() + sl + 
+
+        String implName = out.getPath() + sl +
             cls.getName().replace('.', '_').replace('$', '_') + ".cpp";
 
         if (generating) {
@@ -152,11 +153,11 @@ public class CppWrap {
         List<Class<?>> compatibleTypes = new ArrayList<Class<?>>();
 
         for (Class<?> i : cls.getInterfaces())
-            	compatibleTypes.add(i);
+            compatibleTypes.add(i);
 
-        for (Class<?> superCls = cls.getSuperclass(); 
-             superCls != null; superCls = superCls.getSuperclass()) 
-        	compatibleTypes.add(superCls);
+        for (Class<?> superCls = cls.getSuperclass();
+             superCls != null; superCls = superCls.getSuperclass())
+            compatibleTypes.add(superCls);
 
         return sortClasses(compatibleTypes);
     }
@@ -164,8 +165,8 @@ public class CppWrap {
     // Recursively builds the set of types that are referred to in the definition of
     // the given type.
     public static void getRequiredTypes(
-            Class<?> cls, Set<Class<?>> required, 
-            Map<Class<?>, Integer> minDepths, int currentDepth) {
+        Class<?> cls, Set<Class<?>> required,
+        Map<Class<?>, Integer> minDepths, int currentDepth) {
 
         if (cls.isArray()) {
             getRequiredTypes(cls.getComponentType(), required, minDepths, currentDepth); // same depth
@@ -181,22 +182,21 @@ public class CppWrap {
 
         println("Considering: " + cls.getName());
 
-        if (cls.isPrimitive() || required.contains(cls))
-        {
+        if (cls.isPrimitive() || required.contains(cls)) {
             if (cls.isPrimitive())
                 println("Ignoring primitive: " + cls.getName());
 
             if (required.contains(cls))
-                println("Ignoring already found: " + cls.getName());    
+                println("Ignoring already found: " + cls.getName());
 
             return;
         }
-        
+
         println("Requires: " + cls.getName());
 
         required.add(cls);
         println("Supertypes of: " + cls.getName());
-        for (Class<?> st : getSuperTypes(cls))        
+        for (Class<?> st : getSuperTypes(cls))
             getRequiredTypes(st, required, minDepths, currentDepth + 1);
 
         println("Constructors of: " + cls.getName());
@@ -224,9 +224,9 @@ public class CppWrap {
     }
 
     public static Collection<Class<?>> getDirectlyRequiredTypes(Class<?> cls) {
-    
+
         println("Directly required types for: " + cls.getName());
-    
+
         HashSet<Class<?>> req = new HashSet<Class<?>>();
         Map<Class<?>, Integer> minDepths = new HashMap<Class<?>, Integer>();
         getRequiredTypes(cls, req, minDepths, 0);
@@ -240,15 +240,15 @@ public class CppWrap {
             }
         }
 
-        return sortClasses(pruned);        
+        return sortClasses(pruned);
     }
 
     public static List<Class<?>> sortClasses(Collection<Class<?>> classes) {
-    	List<Class<?>> sorted = new ArrayList<Class<?>>(classes);
+        List<Class<?>> sorted = new ArrayList<Class<?>>(classes);
         Collections.sort(sorted, new Comparator<Class<?>>() {
-			public int compare(Class<?> arg0, Class<?> arg1) {
-				return arg0.getName().compareTo(arg1.getName());
-			}
+            public int compare(Class<?> arg0, Class<?> arg1) {
+                return arg0.getName().compareTo(arg1.getName());
+            }
         });
         return sorted;
     }
@@ -288,22 +288,21 @@ public class CppWrap {
         String referenceSignature = Signature.generate(referenceMethod);
         for (Method method : methods) {
             if (method != referenceMethod
-                    && method.getName().equals(referenceMethod.getName())
-                    && referenceSignature.equals(Signature.generate(method)))
+                && method.getName().equals(referenceMethod.getName())
+                && referenceSignature.equals(Signature.generate(method)))
                 return true;
         }
         return false;
     }
-    
+
     public static void main(String[] args) throws Exception {
         if (args.length < 2)
             System.err.print("Please specify output-path and one or more Java class names");
-        else
-        {
+        else {
             File outDir = new File(args[0]);
-    
+
             boolean generating = true;
-    
+
             Set<Class<?>> required = new HashSet<Class<?>>();
             for (int a = 1; a < args.length; a++) {
                 if (args[a].equals("--log")) {
@@ -312,7 +311,7 @@ public class CppWrap {
                         log = new PrintWriter(new FileWriter(new File(outDir, "CppWrapLog.txt")));
                     }
                 } else if (args[a].equals("--list")) {
-                    generating = false;     
+                    generating = false;
                 } else if (args[a].equals("--generate")) {
                     generating = true;
                 } else {
@@ -331,7 +330,7 @@ public class CppWrap {
             } else {
                 for (String file : files) {
                     System.out.print(file.replace(File.separatorChar, '/') + " ");
-                }    
+                }
             }
 
             if (log != null)

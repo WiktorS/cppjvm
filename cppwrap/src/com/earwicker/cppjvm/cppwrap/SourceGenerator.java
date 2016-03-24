@@ -1,11 +1,17 @@
-
 package com.earwicker.cppjvm.cppwrap;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public abstract class SourceGenerator {
+    protected static final int DECLARE_TYPES = 0;
+    protected static final int CALL_WRAPPED = 1;
+    protected static final int CALL_UNWRAPPED = 2;
     private PrintWriter writer;
     private Class<?> source;
 
@@ -27,7 +33,7 @@ public abstract class SourceGenerator {
     }
 
     public abstract void generate() throws Exception;
-   
+
     private void editWarning() {
         out().println();
         out().println("//");
@@ -68,7 +74,7 @@ public abstract class SourceGenerator {
     }
 
     protected void endNamespace(Class<?> cls) {
-    
+
         int count = cls.getName().split("\\.").length - 1;
         for (Class<?> c = cls.getDeclaringClass(); c != null; c = c.getDeclaringClass()) {
             count++;
@@ -76,26 +82,22 @@ public abstract class SourceGenerator {
 
         for (int n = 0; n < count; n++)
             out().print(" }");
-            
+
         out().println();
     }
-
-    protected static final int DECLARE_TYPES = 0;
-    protected static final int CALL_WRAPPED = 1;
-    protected static final int CALL_UNWRAPPED = 2; 
 
     protected void listParameters(Class<?>[] params, int mode) throws Exception {
         int pos = 0;
         for (Class<?> p : params) {
             pos++;
             out().print(
-                (pos > 1 ? ", " : "") + 
-                (mode == DECLARE_TYPES 
-                    ? (CppWrap.isWrapped(p) ? ("const " + CppWrap.cppType(p) + " &") 
-                                            : (CppWrap.cppType(p) + " "))
-                    : "") +
-                "args" + pos + 
-                (mode == CALL_UNWRAPPED && CppWrap.isWrapped(p) ? ".get_impl()" : "")
+                (pos > 1 ? ", " : "") +
+                    (mode == DECLARE_TYPES
+                        ? (CppWrap.isWrapped(p) ? ("const " + CppWrap.cppType(p) + " &")
+                        : (CppWrap.cppType(p) + " "))
+                        : "") +
+                    "args" + pos +
+                    (mode == CALL_UNWRAPPED && CppWrap.isWrapped(p) ? ".get_impl()" : "")
             );
         }
     }

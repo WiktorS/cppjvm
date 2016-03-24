@@ -1,0 +1,6 @@
+# Enforce Unix newlines
+*.md          text eol=lf
+*.java        text eol=lf
+*.cpp         text eol=lf
+*.hpp         text eol=lf
+*.sh          text eol=lf

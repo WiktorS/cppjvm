@@ -1,9 +1,10 @@
-
 package com.earwicker.cppjvm.cppwrap;
 
-import java.lang.reflect.*;
-import java.util.*;
-import java.io.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Collection;
 
 public class HeaderGenerator extends SourceGenerator {
 
@@ -13,7 +14,7 @@ public class HeaderGenerator extends SourceGenerator {
         includeRequiredTypes();
         forwardDeclareRequiredTypes(); // some circular includes will not have worked
         beginNamespace(cls());
-        
+
         beginClass();
         declareConstructors();
         declareConversions();
@@ -21,7 +22,7 @@ public class HeaderGenerator extends SourceGenerator {
         declareFields();
         //declareSpecialStringFeatures(); // WS this causes problems with MFC
         endClass();
-        
+
         endNamespace(cls());
         endIncludeGuard();
     }
@@ -91,7 +92,7 @@ public class HeaderGenerator extends SourceGenerator {
             out().println(");");
 
             // For non-default and non-copy constructors only:
-            if ((params.length > 1) || 
+            if ((params.length > 1) ||
                 ((params.length == 1) && !params[0].equals(cls()))) {
 
                 // Make an actual C++ constructor
@@ -127,9 +128,9 @@ public class HeaderGenerator extends SourceGenerator {
             }
 
             // [static] return-type methodName(params...) [const];
-            out().print("    " + 
-                (Modifier.isStatic(m.getModifiers()) ? "static " : "") + 
-                CppWrap.cppType(m.getReturnType()) + " " + 
+            out().print("    " +
+                (Modifier.isStatic(m.getModifiers()) ? "static " : "") +
+                CppWrap.cppType(m.getReturnType()) + " " +
                 CppWrap.fixName(m.getName()) + "(");
             listParameters(m.getParameterTypes(), DECLARE_TYPES);
             out().println(Modifier.isStatic(m.getModifiers()) ? ");" : ") const;");
@@ -172,21 +173,21 @@ public class HeaderGenerator extends SourceGenerator {
                 String val = f.get(null).toString();
 
                 val = CppWrap.fixVal(val, f.getType());
-                
-                out().print("    static const " + 
-                    CppWrap.cppType(f.getType()) + " " + 
+
+                out().print("    static const " +
+                    CppWrap.cppType(f.getType()) + " " +
                     CppWrap.fixName(f.getName()) + " = " +
                     val);
-                
-                if(f.getType().equals(Long.TYPE)) {
-                	out().print("LL");
+
+                if (f.getType().equals(Long.TYPE)) {
+                    out().print("LL");
                 }
-                
+
                 out().println(";");
             }
-            out().println("    " + 
-                (Modifier.isStatic(f.getModifiers()) ? "static " : "") + 
-                CppWrap.cppType(f.getType()) + " get_" + 
+            out().println("    " +
+                (Modifier.isStatic(f.getModifiers()) ? "static " : "") +
+                CppWrap.cppType(f.getType()) + " get_" +
                 CppWrap.fixName(f.getName()) + "()" +
                 (Modifier.isStatic(f.getModifiers()) ? ";" : "const;")
             );
@@ -194,10 +195,10 @@ public class HeaderGenerator extends SourceGenerator {
                 out().print("    " +
                     (Modifier.isStatic(f.getModifiers()) ? "static void set_" : "void set_") +
                     CppWrap.fixName(f.getName()) + "(");
-                listParameters(new Class<?>[] { f.getType() }, DECLARE_TYPES);
+                listParameters(new Class<?>[]{f.getType()}, DECLARE_TYPES);
                 out().println(Modifier.isStatic(f.getModifiers()) ? ");" : ") const;");
             }
         }
-    }    
+    }
 }
 

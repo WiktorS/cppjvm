@@ -1,37 +1,12 @@
-
 package com.earwicker.cppjvm.cppwrap;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
-public class Signature 
-{	
-    public static String generate(Class[] p, String r)
-    {
-        StringBuffer b =  new StringBuffer();
-
-        b.append("(");
-
-        for (int n = 0; n < p.length; n++)
-            b.append(generate(p[n]));
-
-        b.append(")");
-        b.append(r);
-        return b.toString();
-    }
-
-    public static String generate(Method m)
-    {
-        return generate(m.getParameterTypes(), 
-                        generate(m.getReturnType()));
-    }
-
-    public static String generate(Constructor m)
-        { return generate(m.getParameterTypes(), "V"); }
-
+public class Signature {
     private static java.util.HashMap<String, String> primitives;
 
-    static
-    {
+    static {
         primitives = new java.util.HashMap<String, String>();
         primitives.put("void", "V");
         primitives.put("boolean", "Z");
@@ -44,8 +19,29 @@ public class Signature
         primitives.put("char", "C");
     }
 
-    public static String generate(Class c)
-    {
+    public static String generate(Class[] p, String r) {
+        StringBuffer b = new StringBuffer();
+
+        b.append("(");
+
+        for (int n = 0; n < p.length; n++)
+            b.append(generate(p[n]));
+
+        b.append(")");
+        b.append(r);
+        return b.toString();
+    }
+
+    public static String generate(Method m) {
+        return generate(m.getParameterTypes(),
+            generate(m.getReturnType()));
+    }
+
+    public static String generate(Constructor m) {
+        return generate(m.getParameterTypes(), "V");
+    }
+
+    public static String generate(Class c) {
         if (c.isPrimitive())
             return primitives.get(c.toString());
         else if (c.isArray())
