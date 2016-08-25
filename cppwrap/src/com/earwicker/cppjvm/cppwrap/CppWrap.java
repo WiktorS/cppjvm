@@ -206,6 +206,12 @@ public class CppWrap {
                     getRequiredTypes(p, required, currentDepth + 1, maxDepth);
             }
 
+            println("Fields of: " + cls.getName());
+            for (Field f: cls.getFields()) {
+                println("Field " + cls.getName() + "." + f.getName());
+                getRequiredTypes(f.getType(), required, currentDepth + 1, maxDepth);
+            }
+
             for (Class<?> c : cls.getClasses()) {
                 println("Nested classes of: " + cls.getName());
                 getRequiredTypes(c, required, currentDepth, maxDepth); // same depth
