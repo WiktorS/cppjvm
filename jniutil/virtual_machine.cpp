@@ -210,9 +210,6 @@ void jvm::virtual_machine::throw_exception(const CStringW &msg, JNIEnv *e) const
 }
 #endif
 
-jvm::virtual_machine *g_vm = 0;
-jvm::virtual_machine g_vm_default;
-
 static std::vector<jvm::global_init_enlist_base *> *g_inits = 0;
 static std::vector<jvm::global_init_enlist_base *> &global_inits()
 {
@@ -255,19 +252,9 @@ void jvm::delist(global_init_enlist_base *init)
         global_inits().end());
 }
 
-#if defined(CPPJVM_VMCREATE)
-void jvm::create_global_vm(const std::string &classPath)
-{
-	if (g_vm != 0)
-		throw std::logic_error("Global virtual machine already initialized");
+#if !defined(CPPJVM_GLOBALVM_NOIMPL)
 
-	g_vm_default.create(classPath);
-	g_vm = &g_vm_default;
-	
-	global_init_startup();
-}
-#endif
-
+static jvm::virtual_machine *g_vm = 0;
 const jvm::virtual_machine &jvm::global_vm()
 {
 	if (g_vm == 0)
@@ -287,3 +274,19 @@ bool jvm::global_vm_available()
 {
 	return (g_vm != 0);
 }
+
+#if defined(CPPJVM_VMCREATE)
+static jvm::virtual_machine g_vm_default;
+void jvm::create_global_vm(const std::string &classPath)
+{
+	if (g_vm != 0)
+		throw std::logic_error("Global virtual machine already initialized");
+
+	g_vm_default.create(classPath);
+	g_vm = &g_vm_default;
+	
+	global_init_startup();
+}
+#endif /* defined(CPPJVM_VMCREATE) */
+
+#endif /* !defined(CPPJVM_GLOBALVM_NOIMPL) */

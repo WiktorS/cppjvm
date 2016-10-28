@@ -17,7 +17,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="$(SolutionDir)\out\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\..\out\$(ConfigurationName)"
 			IntermediateDirectory=".builds\$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="2"
@@ -43,7 +43,7 @@
 				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(ProjectDir)\include&quot;"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_EXPORTS;CPPJVM_VMSET;CPPJVM_MFC"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_LIB;CPPJVM_GLOBALVM_NOIMPL;CPPJVM_VMSET;CPPJVM_MFC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -82,7 +82,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="$(SolutionDir)\out\$(ConfigurationName)"
+			OutputDirectory="$(ProjectDir)\..\out\$(ConfigurationName)"
 			IntermediateDirectory=".builds\$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="2"
@@ -107,7 +107,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="&quot;$(JAVA_HOME)\include&quot;;&quot;$(JAVA_HOME)\include\win32&quot;;&quot;$(ProjectDir)\include&quot;"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_EXPORTS;CPPJVM_VMSET;CPPJVM_MFC"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;CPPJVM_GLOBAL_VM_NOIMPL;CPPJVM_VMSET;CPPJVM_MFC"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -207,6 +207,10 @@
 			</File>
 			<File
 				RelativePath=".\include\jvm\virtual_machine.hpp"
+				>
+			</File>
+			<File
+				RelativePath=".\include\jvm\virtual_machine_global_impl.hpp"
 				>
 			</File>
 		</Filter>

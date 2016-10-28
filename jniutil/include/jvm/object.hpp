@@ -47,8 +47,8 @@ namespace jvm
             { m_object = 0; }
 
 	protected:
-		CPPJVM_API void make_global();
-		CPPJVM_API void delete_global();
+		void make_global();
+		void delete_global();
 	};
 
 	// Used to distinguish the default contructor in generated wrappers
